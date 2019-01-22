@@ -381,9 +381,13 @@ void Probabilistic::run(uint32_t k, double delta, double err,
 	uint32_t tau = omega / start_factor; // Da sistemare
 
 	if (union_sample == 0) {
-		union_sample =
-		    min(get_nn(),
-		        (uint32_t)max(2 * sqrt(get_ne()) / omp_get_max_threads(), k + 20.));
+		if (absolute) {
+			union_sample = get_nn();
+		} else {
+			union_sample = min(
+			    get_nn(),
+			    (uint32_t)max(2 * sqrt(get_ne()) / omp_get_max_threads(), k + 20.));
+		}
 	}
 	this->union_sample = union_sample;
 	this->k = min(k, get_nn());
