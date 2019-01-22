@@ -1,4 +1,5 @@
 #include <cfloat>
+#include <chrono>
 #include <iomanip>
 #include <iostream>
 #include <limits.h>
@@ -402,6 +403,8 @@ void Probabilistic::run(uint32_t k, double delta, double err,
 		random_seed[i] = rand();
 	}
 
+	auto start = std::chrono::high_resolution_clock::now();
+
 #pragma omp parallel
 	{
 		Sp_sampler sp_sampler(this, random_seed[omp_get_thread_num()]);
@@ -420,6 +423,10 @@ void Probabilistic::run(uint32_t k, double delta, double err,
 			}
 		}
 	}
+	auto end = chrono::high_resolution_clock::now();
+	cout << "Time first part: "
+	     << chrono::duration_cast<chrono::milliseconds>(end - start).count()
+	     << endl;
 
 	*time_bfs = 0;
 	*time_critical = 0;
@@ -430,6 +437,8 @@ void Probabilistic::run(uint32_t k, double delta, double err,
 	for (uint32_t i = 0; i < get_nn(); i++) {
 		approx[i] = 0;
 	}
+
+	start = chrono::high_resolution_clock::now();
 
 #pragma omp parallel
 	{
@@ -460,6 +469,10 @@ void Probabilistic::run(uint32_t k, double delta, double err,
 			}
 		}
 	}
+	end = chrono::high_resolution_clock::now();
+	cout << "Time second part: "
+	     << chrono::duration_cast<chrono::milliseconds>(end - start).count()
+	     << endl;
 	if (verbose > 0) {
 		Status status(union_sample);
 		get_status(&status);
